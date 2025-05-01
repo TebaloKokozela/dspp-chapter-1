@@ -6,13 +6,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
+from src.data.load_data import load_dataset
 import numpy as np
 
 mpl.rcParams['figure.dpi'] = 100
 sns.set_style('white')
 
 
-df = pd.read_csv('../data/Chapter_1_cleaned_data.csv')
+df = load_dataset()
 
 y = df['default payment next month']
 X = df['limit_bal']
