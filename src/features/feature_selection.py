@@ -4,7 +4,10 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import os
+
+sns.set_style('whitegrid')
 
 fig_loc= os.path.abspath('../../outputs/figures')
 
@@ -32,7 +35,7 @@ corr_mat =  df.corr()
 
 
 plt.figure()
-sns.heatmap(corr_mat,cbar=True, center=0,annot=True,fmt="0.2f",annot_kws={"size":"xx-small"})
+sns.heatmap(corr_mat,cbar=True, center=0,annot=True,fmt="0.2f",annot_kws={"size":"xx-small"},linewidths=0.5)
 plt.title('Pearson Correlation Plot')
 plt.savefig(os.path.join(fig_loc,'features_Heatmap.png'))
 
@@ -45,7 +48,7 @@ y = df.iloc[:,-1].values
 f_statistics, p_values = f_classif(X,y)
 
 f_stats_df =  pd.DataFrame({'f_stat':f_statistics,'p_values':p_values},index=df.columns[:-1])
-# f_stats_df['inverse_p_values'] = 1- f_stats_df['p_values']
+f_stats_df['inverse_p_values'] = 1- f_stats_df['p_values']
 plt.figure()
 (f_stats_df.sort_values('f_stat',ascending=False))['f_stat'].plot(kind='barh')
 plt.savefig(os.path.join(fig_loc,'f_statistics_bar_plot.png'))
@@ -54,7 +57,23 @@ plt.savefig(os.path.join(fig_loc,'f_statistics_bar_plot.png'))
 selector =  SelectPercentile(f_classif,percentile=20)
 selector.fit(X,y)
 
-print(f' (df.iloc[:,:-1].columns[selector.get_support()])')
+print('\n')
+print(f'Features to keep: {(df.iloc[:,:-1].columns[selector.get_support()])}')
 
 print(X[:,selector.get_support()].shape)
 #print(selector.__dict__)
+
+# assessing 20th percentile vars
+plt.figure()
+df.groupby('pay_1').agg({'default payment next month':"mean"}).plot()
+plt.savefig(os.path.join(fig_loc,'default_rate_per_pay_ind.png'))
+
+print(df['limit_bal'].describe())
+print('\n')
+print(df['pay_amt1'].describe())
+print('\n')
+
+plt.figure()
+sns.pairplot(df[['pay_1', 'pay_amt1', 'pay_amt2','default payment next month']],
+             hue='default payment next month')
+plt.savefig(os.path.join(fig_loc,'scatter_plot_numerical.png'))
